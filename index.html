@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Network Effects Opportunity Identifier</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-primary: #0a0a0a;
+    --bg-secondary: #121212;
+    --bg-tertiary: #1a1a1a;
+    --text-primary: #f0f0f0;
+    --text-secondary: #b0b0b0;
+    --text-tertiary: #808080;
+    --accent-primary: #00d4ff;
+    --accent-secondary: #ff006e;
+    --accent-tertiary: #8338ec;
+    --accent-light: rgba(0, 212, 255, 0.1);
+    --border-light: rgba(0, 212, 255, 0.15);
+    --border-med: rgba(255, 0, 110, 0.2);
+    --font-display: 'Space Mono', monospace;
+    --font-sans: 'Inter', sans-serif;
+    --font-mono: 'Space Mono', monospace;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    font-family: var(--font-sans);
+    font-weight: 400;
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  /* GLOW EFFECT BACKGROUND */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: 
+      radial-gradient(circle at 30% 30%, rgba(0, 212, 255, 0.08) 0%, transparent 40%),
+      radial-gradient(circle at 70% 70%, rgba(255, 0, 110, 0.06) 0%, transparent 40%),
+      radial-gradient(circle at 85% 20%, rgba(131, 56, 236, 0.05) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* GRID LINES */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(0deg, rgba(0, 212, 255, 0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0, 212, 255, 0.04) 1px, transparent 1px);
+    background-size: 64px 64px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 0 32px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* NAV */
+  nav {
+    padding: 32px 0;
+    border-bottom: 1px solid var(--border-light);
+    position: relative;
+    z-index: 50;
+  }
+  nav .container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .nav-logo {
+    font-family: var(--font-mono);
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-primary);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .nav-logo span {
+    color: var(--accent-primary);
+  }
+  .nav-cta {
+    font-family: var(--font-sans);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    color: var(--accent-primary);
+    text-decoration: none;
+    text-transform: uppercase;
+    border: 1px solid var(--border-light);
+    padding: 10px 20px;
+    transition: all 0.2s;
+    cursor: pointer;
+  }
+  .nav-cta:hover {
+    background: var(--accent-light);
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 16px rgba(0, 212, 255, 0.3);
+  }
+
+  /* HERO */
+  .hero {
+    padding: 120px 0 100px;
+    position: relative;
+  }
+  .hero-tag {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: var(--accent-primary);
+    text-transform: uppercase;
+    margin-bottom: 40px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    opacity: 0;
+    animation: fadeUp 0.7s ease forwards 0.1s;
+  }
+  .hero-tag::before {
+    content: '';
+    width: 40px;
+    height: 1px;
+    background: var(--accent-primary);
+  }
+  .hero h1 {
+    font-family: var(--font-mono);
+    font-size: clamp(40px, 6vw, 72px);
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    margin-bottom: 32px;
+    opacity: 0;
+    animation: fadeUp 0.8s ease forwards 0.2s;
+  }
+  .hero h1 em {
+    font-style: normal;
+    color: var(--accent-secondary);
+    text-shadow: 0 0 20px rgba(255, 0, 110, 0.4);
+  }
+  .hero-sub {
+    font-family: var(--font-sans);
+    font-size: 16px;
+    font-weight: 400;
+    color: var(--text-secondary);
+    max-width: 660px;
+    line-height: 1.8;
+    margin-bottom: 56px;
+    opacity: 0;
+    animation: fadeUp 0.8s ease forwards 0.3s;
+  }
+  .hero-sub strong {
+    color: var(--text-primary);
+    font-weight: 600;
+  }
+  .hero-cta-group {
+    display: flex;
+    align-items: center;
+    gap: 32px;
+    flex-wrap: wrap;
+    opacity: 0;
+    animation: fadeUp 0.8s ease forwards 0.45s;
+  }
+  .btn-primary {
+    font-family: var(--font-sans);
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-weight: 600;
+    background: var(--accent-primary);
+    color: var(--bg-primary);
+    padding: 14px 32px;
+    border: 1px solid var(--accent-primary);
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+  }
+  .btn-primary::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: var(--accent-secondary);
+    z-index: -1;
+    transition: left 0.3s ease;
+  }
+  .btn-primary:hover {
+    color: var(--text-primary);
+    border-color: var(--accent-secondary);
+    box-shadow: 0 0 20px rgba(0, 212, 255, 0.4);
+  }
+  .btn-primary:hover::before {
+    left: 0;
+  }
+  .hero-price {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--text-tertiary);
+    letter-spacing: 0.05em;
+  }
+  .hero-price span {
+    color: var(--text-secondary);
+    font-weight: 600;
+  }
+
+  /* SECTION BASE */
+  section {
+    padding: 100px 0;
+    border-bottom: 1px solid var(--border-light);
+  }
+  .section-label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    color: var(--accent-primary);
+    text-transform: uppercase;
+    margin-bottom: 56px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    font-weight: 600;
+  }
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border-light);
+    max-width: 100px;
+  }
+
+  /* WHO IT'S FOR */
+  .for-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+  .for-item {
+    padding: 44px 0;
+    border-bottom: 1px solid var(--border-light);
+    display: grid;
+    grid-template-columns: 48px 1fr;
+    gap: 32px;
+    align-items: start;
+  }
+  .for-item:last-child { border-bottom: none; }
+  .for-num {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--accent-secondary);
+    letter-spacing: 0.1em;
+    padding-top: 2px;
+  }
+  .for-text {
+    font-size: 15px;
+    font-weight: 400;
+    color: var(--text-secondary);
+    line-height: 1.75;
+  }
+  .for-text strong {
+    color: var(--text-primary);
+    font-weight: 600;
+    display: block;
+    margin-bottom: 8px;
+    font-size: 15px;
+  }
+
+  /* DELIVERABLES */
+  .deliverables-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2px;
+  }
+  .deliverable-card {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-light);
+    padding: 40px;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+  }
+  .deliverable-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 3px;
+    height: 0;
+    background: linear-gradient(180deg, var(--accent-primary), var(--accent-secondary));
+    transition: height 0.3s ease;
+  }
+  .deliverable-card:hover::before {
+    height: 100%;
+  }
+  .deliverable-card:hover {
+    border-color: var(--accent-primary);
+    background: var(--bg-tertiary);
+    box-shadow: 0 0 24px rgba(0, 212, 255, 0.2);
+  }
+  .deliverable-tag {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    color: var(--accent-secondary);
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    font-weight: 700;
+  }
+  .deliverable-title {
+    font-family: var(--font-mono);
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 12px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+  .deliverable-desc {
+    font-size: 14px;
+    color: var(--text-secondary);
+    line-height: 1.75;
+    font-weight: 400;
+  }
+
+  /* PRICING */
+  .pricing-block {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-light);
+    padding: 56px;
+    position: relative;
+    overflow: hidden;
+  }
+  .pricing-block::before {
+    content: '';
+    position: absolute;
+    top: -100px;
+    right: -100px;
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(circle, rgba(0, 212, 255, 0.15) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .pricing-block::after {
+    content: '';
+    position: absolute;
+    bottom: -100px;
+    left: -100px;
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(circle, rgba(255, 0, 110, 0.1) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .price-amount {
+    font-family: var(--font-mono);
+    font-size: clamp(52px, 8vw, 96px);
+    font-weight: 700;
+    color: var(--accent-primary);
+    letter-spacing: -0.02em;
+    line-height: 1;
+    margin-bottom: 8px;
+    text-shadow: 0 0 30px rgba(0, 212, 255, 0.3);
+  }
+  .price-meta {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--text-tertiary);
+    letter-spacing: 0.05em;
+    margin-bottom: 40px;
+    text-transform: uppercase;
+  }
+  .price-includes {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .price-includes li {
+    font-family: var(--font-sans);
+    font-size: 14px;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    letter-spacing: 0.02em;
+    font-weight: 400;
+  }
+  .price-includes li::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    background:
+ var(--accent-primary);
+    border-radius: 50%;
+    flex-shrink: 0;
+    box-shadow: 0 0 12px rgba(0, 212, 255, 0.6);
+  }
+
+  /* HOW IT WORKS */
+  .steps {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0;
+    counter-reset: steps;
+  }
+  .step {
+    display: grid;
+    grid-template-columns: 100px 1fr;
+    gap: 32px;
+    padding: 48px 0;
+    border-bottom: 1px solid var(--border-light);
+    counter-increment: steps;
+  }
+  .step:last-child { border-bottom: none; }
+  .step-num {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--accent-secondary);
+    letter-spacing: 0.1em;
+    font-weight: 700;
+    text-transform: uppercase;
+    padding-top: 2px;
+  }
+  .step-title {
+    font-family: var(--font-mono);
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 12px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+  .step-desc {
+    font-size: 14px;
+    color: var(--text-secondary);
+    line-height: 1.75;
+    font-weight: 400;
+  }
+
+  /* ABOUT */
+  .about-block {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: start;
+  }
+  @media (max-width: 768px) {
+    .about-block { grid-template-columns: 1fr; gap: 48px; }
+  }
+
+  .about-text p {
+    font-size: 15px;
+    color: var(--text-secondary);
+    line-height: 1.85;
+    font-weight: 400;
+    margin-bottom: 20px;
+  }
+  .about-text p:last-child { margin-bottom: 0; }
+  .about-text p strong {
+    color: var(--text-primary);
+    font-weight: 600;
+  }
+  .about-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .stack-label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    color: var(--text-tertiary);
+    text-transform: uppercase;
+    margin-bottom: 20px;
+    font-weight: 700;
+  }
+  .stack-item {
+    font-family: var(--font-sans);
+    font-size: 13px;
+    color: var(--text-secondary);
+    padding: 12px 14px;
+    background: var(--bg-tertiary);
+    border-left: 2px solid var(--border-light);
+    letter-spacing: 0.02em;
+    transition: all 0.2s;
+    font-weight: 400;
+  }
+  .stack-item:hover {
+    border-left-color: var(--accent-primary);
+    color: var(--text-primary);
+    background: rgba(0, 212, 255, 0.05);
+    box-shadow: inset 0 0 12px rgba(0, 212, 255, 0.1);
+  }
+
+  /* FAQ */
+  .faq-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+  .faq-item {
+    border-bottom: 1px solid var(--border-light);
+    padding: 32px 0;
+  }
+  .faq-item:first-child { border-top: 1px solid var(--border-light); }
+  .faq-q {
+    font-family: var(--font-sans);
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    transition: color 0.2s;
+  }
+  .faq-q:hover {
+    color: var(--accent-primary);
+  }
+  .faq-q::after {
+    content: '+';
+    font-family: var(--font-mono);
+    font-size: 18px;
+    color: var(--accent-secondary);
+    flex-shrink: 0;
+    transition: transform 0.3s ease, color 0.2s;
+    font-weight: 700;
+  }
+  .faq-item.open .faq-q::after {
+    transform: rotate(45deg);
+    color: var(--accent-primary);
+  }
+  .faq-a {
+    font-size: 14px;
+    color: var(--text-secondary);
+    line-height: 1.8;
+    font-weight: 400;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease, padding 0.3s ease;
+  }
+  .faq-item.open .faq-a {
+    max-height: 250px;
+    padding-top: 16px;
+  }
+
+  /* FINAL CTA */
+  .final-cta {
+    padding: 120px 0;
+    text-align: center;
+    border-bottom: none;
+  }
+  .final-cta h2 {
+    font-family: var(--font-mono);
+    font-size: clamp(32px, 5vw, 56px);
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    margin-bottom: 24px;
+    line-height: 1.15;
+    color: var(--text-primary);
+    text-transform: uppercase;
+  }
+  .final-cta h2 em {
+    font-style: normal;
+    color: var(--accent-secondary);
+    text-shadow: 0 0 20px rgba(255, 0, 110, 0.3);
+  }
+  .final-cta p {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-bottom: 48px;
+    font-family: var(--font-mono);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  /* FOOTER */
+  footer {
+    border-top: 1px solid var(--border-light);
+    padding: 40px 0;
+    background: var(--bg-secondary);
+  }
+  footer .container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 24px;
+  }
+  footer span {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-secondary);
+    letter-spacing: 0.08em;
+    font-weight: 500;
+    text-transform: uppercase;
+  }
+  footer span em {
+    color: var(--accent-primary);
+    font-style: normal;
+    font-weight: 700;
+  }
+
+  /* ANIMATIONS */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .reveal {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  @media (max-width: 768px) {
+    .container { padding: 0 24px; }
+    .hero { padding: 80px 0 60px; }
+    section { padding: 60px 0; }
+    .for-item, .step { grid-template-columns: 40px 1fr; gap: 20px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="container">
+    <div class="nav-logo">net<span>effects</span></div>
+    <a href="#cta" class="nav-cta">Get Started</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero" style="border-bottom: 1px solid var(--border-light); padding-bottom: 80px;">
+  <div class="container">
+    <div class="hero-tag">Platform Strategy</div>
+    <h1>Find where your services <em>compound</em></h1>
+    <p class="hero-sub">
+      A network effects analysis that maps where your offerings create actual compounding value rather than just stacking. You get a strategy document, architecture sketch, and roadmap for building or partnering.
+    </p>
+    <div class="hero-cta-group">
+      <a href="#cta" class="btn-primary">Book a Call</a>
+      <span class="hero-price">Starting at <span>$1,200</span> in 7 days</span>
+    </div>
+  </div>
+</section>
+
+<!-- WHO IT'S FOR -->
+<section>
+  <div class="container">
+    <div class="section-label reveal">Who This Is For</div>
+    <div class="for-grid">
+      <div class="for-item reveal">
+        <span class="for-num">01</span>
+        <div class="for-text">
+          <strong>Founders scaling a service into a platform</strong>
+          You have two or three offerings running and wonder if there is a larger platform underneath, or if you are just running parallel services.
+        </div>
+      </div>
+      <div class="for-item reveal">
+        <span class="for-num">02</span>
+        <div class="for-text">
+          <strong>Operators building vertical integrations</strong>
+          You are pulling multiple providers, data sources, or service lines together and need to prove the architecture works before investing in it.
+        </div>
+      </div>
+      <div class="for-item reveal">
+        <span class="for-num">03</span>
+        <div class="for-text">
+          <strong>Technical founders who think in systems</strong>
+          You understand network effects in theory. You need someone to map them to your actual business model and show you where the real leverage is.
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DELIVERABLES -->
+<section>
+  <div class="container">
+    <div class="section-label reveal">What You Get</div>
+    <div class="deliverables-grid">
+      <div class="deliverable-card reveal">
+        <div class="deliverable-tag">01 Network Effects Map</div>
+        <div class="deliverable-title">Opportunity Map</div>
+        <div class="deliverable-desc">A structured analysis identifying where customer interactions, data flows, or platform dynamics create compounding value. Specific nodes in your business model where more customers make the service measurably better.</div>
+      </div>
+      <div class="deliverable-card reveal">
+        <div class="deliverable-tag">02 Architecture</div>
+        <div class="deliverable-title">Platform Architecture</div>
+        <div class="deliverable-desc">A technical diagram showing the platform layer that unlocks identified network effects. Includes sequencing, dependencies, and build versus partner recommendations for each component.</div>
+      </div>
+      <div class="deliverable-card reveal">
+        <div class="deliverable-tag">03 Go No-Go Roadmap</div>
+        <div class="deliverable-title">Execution Roadmap</div>
+        <div class="deliverable-desc">Which effects to pursue first, realistic build costs, partnership opportunities, and assessment of which ones will not survive your constraints. One revision round included.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section>
+  <div class="container">
+    <div class="section-label reveal">Investment</div>
+    <div class="pricing-block reveal">
+      <div class="price-amount">$1,200</div>
+      <div class="price-meta">Flat Rate | 7 Business Days | 1 Revision Round</div>
+      <ul class="price-includes">
+        <li>30 minute intake call and 60 minute delivery walkthrough</li>
+        <li>Network Effects Opportunity Map in PDF and interactive HTML</li>
+        <li>Platform Architecture Sketch as Mermaid diagram and annotated PDF</li>
+        <li>Go No-Go Roadmap with build cost estimates</li>
+        <li>One revision round within 5 days of delivery</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section>
+  <div class="container">
+    <div class="section-label reveal">Process</div>
+    <div class="steps">
+      <div class="step reveal">
+        <div class="step-num">Step 01</div>
+        <div class="step-content">
+      
+    <div class="step-title">Intake Call</div>
+          <div class="step-desc">30 minutes. Walk me through your current services, customer types, and the vision you are building toward. No prep required. Just show up with an honest account of what is working and what is not.</div>
+        </div>
+      </div>
+      <div class="step reveal">
+        <div class="step-num">Step 02</div>
+        <div class="step-content">
+          <div class="step-title">Analysis and Data Handoff</div>
+          <div class="step-desc">I send a scope doc with the analysis approach and a short list of what I need: anonymized customer flows, service metrics, rough revenue by offering, and your tech stack. Rough estimates are fine.</div>
+        </div>
+      </div>
+      <div class="step reveal">
+        <div class="step-num">Step 03</div>
+        <div class="step-content">
+          <div class="step-title">Delivery and Walkthrough</div>
+          <div class="step-desc">I build the map, architecture sketch, and roadmap. We walk through it together. I explain the reasoning, you push back, we refine. You pay on delivery.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section>
+  <div class="container">
+    <div class="section-label reveal">About</div>
+    <div class="about-block">
+      <div class="about-text reveal">
+        <p>I have spent five years building and scaling independent services. Community launch consulting. Data cleanup for nonprofits. Green infrastructure ROI modeling. I started seeing where they could compound into something bigger.</p>
+        <p>I am a full-stack developer with deep expertise in <strong>geospatial data, systems design, and data architecture.</strong> That combination means I think about how things actually connect, not just how they look on a slide.</p>
+        <p>I do the analysis and writing myself. No templates applied to your business. No outsourced research. No generic playbook. If your model does not have network effects worth pursuing, I will tell you that.</p>
+      </div>
+      <div class="about-stack reveal">
+        <div class="stack-label">Technical Foundation</div>
+        <div class="stack-item">Python, SQL, JavaScript, Next.js</div>
+        <div class="stack-item">ArcGIS, QGIS, Geospatial Analysis</div>
+        <div class="stack-item">Systems Design, Data Architecture</div>
+        <div class="stack-item">Supabase, React, Web Infrastructure</div>
+        <div class="stack-item">Green Infrastructure, GIS Modeling</div>
+        <div class="stack-item">B.S. Computing and Informatics</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section>
+  <div class="container">
+    <div class="section-label reveal">Questions</div>
+    <div class="faq-list reveal">
+      <div class="faq-item">
+        <div class="faq-q">How long does this actually take</div>
+        <div class="faq-a">Total timeline is two weeks from first call to delivery. Analysis runs 5 to 7 business days. The intake call and delivery walkthrough fit your schedule.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">What data do you need from me</div>
+        <div class="faq-a">Description of each service, rough customer numbers or revenue per offering, and where customers or data overlap between services. I am not auditing your books. Estimates are fine.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">What if my services do not have network effects</div>
+        <div class="faq-a">I will flag which services are independent and which could connect with the right architecture. Sometimes the answer is scale these separately. That is valuable to know before you invest engineering time.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">What if my situation is more complex</div>
+        <div class="faq-a">I will still do the analysis and deliver a roadmap. If complexity requires deeper modeling, financial projections, full technical architecture, or customer research, I will flag that and we can scope it separately.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FINAL CTA -->
+<section class="final-cta" id="cta">
+  <div class="container">
+    <h2>Find out if your services <em>compound or stack</em></h2>
+    <p>$1,200 flat | 7 business days | 1 revision round</p>
+    <a href="#" class="btn-primary">Book a Call</a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="container">
+    <span>net<em>effects</em> strategy</span>
+    <span>Platform architecture for <em>technical founders</em></span>
+  </div>
+</footer>
+
+<script>
+  // Scroll reveal
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry, i) => {
+      if (entry.isIntersecting) {
+        setTimeout(() => entry.target.classList.add('visible'), i * 50);
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+  reveals.forEach(el => observer.observe(el));
+
+  // FAQ accordion
+  document.querySelectorAll('.faq-q').forEach(q => {
+    q.addEventListener('click', () => {
+      const item = q.parentElement;
+      const isOpen = item.classList.contains('open');
+      document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
+      if (!isOpen) item.classList.add('open');
+    });
+  });
+</script>
+</body>
+</html>
